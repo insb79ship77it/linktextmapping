@@ -48,10 +48,10 @@
             color: #555;
         }
         .count-badge {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #007bff;
             background-color: #e6f2ff;
-            padding: 2px 8px;
+            padding: 3px 10px;
             border-radius: 12px;
         }
         textarea, input[type="text"] {
@@ -110,11 +110,11 @@
             line-height: 1.8;
             font-size: 1.1rem;
             min-height: 50px;
+            white-space: pre-wrap;
         }
         .result-box a {
             color: #007bff;
             text-decoration: none;
-            margin: 0 2px;
         }
         .result-box a:hover {
             text-decoration: underline;
@@ -137,7 +137,7 @@
     <div class="form-group">
         <label for="textInput">
             <span>2. 텍스트 입력</span>
-            <span class="count-badge">현재 <span id="textCount">0</span>자</span>
+            <span class="count-badge">공백 포함 <span id="textCount">0</span>자 / 공백 제외 <span id="textCountNoSpace">0</span>자</span>
         </label>
         <input type="text" id="textInput" oninput="updateCounts()">
     </div>
@@ -170,7 +170,11 @@
         document.getElementById('linkCount').textContent = links.length;
 
         const textRaw = document.getElementById('textInput').value;
-        document.getElementById('textCount').textContent = textRaw.length;
+        const totalChars = textRaw.length;
+        const noSpaceChars = textRaw.replace(/\s/g, '').length;
+
+        document.getElementById('textCount').textContent = totalChars;
+        document.getElementById('textCountNoSpace').textContent = noSpaceChars;
     }
 
     function generateLinks() {
@@ -183,40 +187,45 @@
                               .map(link => link.trim())
                               .filter(link => link.length > 0);
 
-        const characters = textRaw.split('');
-
-        if (characters.length === 0) {
+        if (textRaw.length === 0) {
             htmlSource.value = '';
             resultContainer.innerHTML = '<span style="color:red; font-size:0.9rem;">텍스트를 입력해주세요.</span>';
             return;
         }
 
         let outputHTML = '';
+        let linkIndex = 0;
 
-        characters.forEach((char, index) => {
-            if (index < links.length) {
-                let url = links[index];
-                if (!/^https?:\/\//i.test(url)) {
-                    url = 'http://' + url;
-                }
-                outputHTML += `<a href="${url}" target="_blank">${char}</a>`;
+        // 글자 단위와 뒤따르는 공백을 함께 그룹화하여 처리
+        const matches = textRaw.match(/(\s+)|([^\s]\s*)/g) || [];
+
+        matches.forEach(item => {
+            // 문장 맨 앞에 오는 순수 공백 처리
+            if (/^\s+$/.test(item)) {
+                outputHTML += item;
             } else {
-                outputHTML += char;
+                // 글자(및 뒤따르는 띄어쓰기)에 링크 연결
+                if (linkIndex < links.length) {
+                    let url = links[linkIndex++];
+                    if (!/^https?:\/\//i.test(url)) {
+                        url = 'http://' + url;
+                    }
+                    outputHTML += `<a href="${url}" target="_blank">${item}</a>`;
+                } else {
+                    outputHTML += item;
+                }
             }
         });
 
-        // HTML 소스 창 및 결과 미리보기 동시 업데이트
         htmlSource.value = outputHTML;
         resultContainer.innerHTML = outputHTML;
     }
 
-    // 소스 입력창에서 직적 수정할 때 실시간으로 결과 미리보기 업데이트
     function renderFromSource() {
         const source = document.getElementById('htmlSource').value;
         document.getElementById('result').innerHTML = source;
     }
 
-    // HTML 태그 소스 자체를 복사
     function copyHtmlSource() {
         const htmlSource = document.getElementById('htmlSource');
         if (!htmlSource.value.trim()) {
@@ -228,7 +237,6 @@
         alert('HTML 소스가 복사되었습니다.');
     }
 
-    // 화면에 렌더링된 결과 글자(링크 포함) 복사
     function copyResult() {
         const resultContainer = document.getElementById('result');
         
@@ -244,7 +252,7 @@
 
         try {
             document.execCommand('copy');
-            alert('결과 글자가 복사되었습니다. (에디터 등에 붙여넣기 하세요)');
+            alert('결과 글자가 복사되었습니다.');
         } catch (err) {
             alert('복사에 실패했습니다.');
         }
