@@ -16,10 +16,17 @@
             font-family: 'Pretendard', sans-serif;
             background-color: #f4f7f6;
             display: flex;
+            flex-direction: column; /* h1과 container를 위아래로 정렬 */
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 20px;
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
         }
         .container {
             background-color: #ffffff;
@@ -28,12 +35,6 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 600px;
-        }
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            color: #333;
-            text-align: center;
         }
         .form-group {
             margin-bottom: 20px;
@@ -111,10 +112,8 @@
 <body>
 
 <h1>텍스트-링크 매핑 생성기</h1>
-    
+
 <div class="container">
-    
-    
     <div class="form-group">
         <label for="linksInput">
             <span>1. 링크 목록 (줄바꿈으로 구분)</span>
@@ -144,12 +143,10 @@
 
 <script>
     function updateCounts() {
-        // 링크 개수 카운트
         const linksRaw = document.getElementById('linksInput').value;
         const links = linksRaw.split('\n').filter(link => link.trim().length > 0);
         document.getElementById('linkCount').textContent = links.length;
 
-        // 텍스트 글자수 카운트
         const textRaw = document.getElementById('textInput').value;
         document.getElementById('textCount').textContent = textRaw.length;
     }
