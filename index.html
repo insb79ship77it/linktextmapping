@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>링크 매핑 도구</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        textarea {
+            height: 120px;
+            resize: vertical;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result-box {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #eef2f5;
+            border-radius: 6px;
+            word-break: break-all;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+        .result-box a {
+            color: #007bff;
+            text-decoration: none;
+            margin: 0 2px;
+        }
+        .result-box a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>텍스트-링크 매핑 생성기</h1>
+    
+    <div class="form-group">
+        <label for="linksInput">1. 링크 목록 (줄바꿈으로 구분)</label>
+        <textarea id="linksInput" placeholder="https://naver.com&#10;https://google.com&#10;https://yahoo.com"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="textInput">2. 텍스트 입력</label>
+        <input type="text" id="textInput" placeholder="ABCDE">
+    </div>
+
+    <button onclick="generateLinks()">변환하기</button>
+
+    <div class="form-group" style="margin-top: 25px;">
+        <label>3. 결과 출력</label>
+        <div id="result" class="result-box">결과가 여기에 표시됩니다.</div>
+    </div>
+</div>
+
+<script>
+    function generateLinks() {
+        const linksRaw = document.getElementById('linksInput').value;
+        const textRaw = document.getElementById('textInput').value;
+        const resultContainer = document.getElementById('result');
+
+        // 입력된 링크를 줄바꿈 기준으로 분할하고 공백 제거 및 빈 줄 제외
+        const links = linksRaw.split('\n')
+                              .map(link => link.trim())
+                              .filter(link => link.length > 0);
+
+        // 입력된 텍스트를 한 글자씩 분할
+        const characters = textRaw.split('');
+
+        if (characters.length === 0) {
+            resultContainer.innerHTML = '<span style="color:red;">텍스트를 입력해주세요.</span>';
+            return;
+        }
+
+        let outputHTML = '';
+
+        characters.forEach((char, index) => {
+            // 해당 위치에 매칭되는 링크가 존재할 경우 a 태그 감싸기
+            if (index < links.length) {
+                let url = links[index];
+                // http:// 또는 https:// 가 없을 경우 자동으로 붙여주기
+                if (!/^https?:\/\//i.test(url)) {
+                    url = 'http://' + url;
+                }
+                outputHTML += `<a href="${url}" target="_blank">${char}</a>`;
+            } else {
+                // 링크 개수보다 텍스트가 더 많은 경우 일반 글자로 출력
+                outputHTML += char;
+            }
+        });
+
+        resultContainer.innerHTML = outputHTML;
+    }
+</script>
+
+</body>
+</html>
