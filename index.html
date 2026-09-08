@@ -16,7 +16,7 @@
             font-family: 'Pretendard', sans-serif;
             background-color: #f4f7f6;
             display: flex;
-            flex-direction: column; /* h1과 container를 위아래로 정렬 */
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
@@ -63,8 +63,14 @@
             font-family: 'Pretendard', sans-serif;
         }
         textarea {
-            height: 250px;
+            height: 200px;
             resize: vertical;
+        }
+        .source-textarea {
+            height: 100px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            background-color: #f8f9fa;
         }
         button {
             width: 100%;
@@ -88,6 +94,12 @@
         }
         .copy-btn:hover {
             background-color: #218838;
+        }
+        .copy-btn-alt {
+            background-color: #17a2b8;
+        }
+        .copy-btn-alt:hover {
+            background-color: #138496;
         }
         .result-box {
             margin-top: 10px;
@@ -132,10 +144,20 @@
 
     <button onclick="generateLinks()">변환하기</button>
 
+    <!-- HTML 소스 출력 및 수정 영역 -->
     <div class="form-group" style="margin-top: 25px;">
+        <label for="htmlSource">
+            <span>3. HTML 소스 (수정 가능)</span>
+            <button class="copy-btn" style="width: auto; padding: 5px 10px; margin: 0; font-size: 0.85rem;" onclick="copyHtmlSource()">HTML 소스 복사</button>
+        </label>
+        <textarea id="htmlSource" class="source-textarea" placeholder="변환하기 버튼을 누르면 HTML 소스가 생성됩니다." oninput="renderFromSource()"></textarea>
+    </div>
+
+    <!-- 최종 결과 미리보기 영역 -->
+    <div class="form-group">
         <label>
-            <span>3. 결과 출력</span>
-            <button class="copy-btn" style="width: auto; padding: 6px 12px; margin: 0; font-size: 0.9rem;" onclick="copyResult()">결과 복사하기</button>
+            <span>4. 최종 결과 미리보기</span>
+            <button class="copy-btn copy-btn-alt" style="width: auto; padding: 5px 10px; margin: 0; font-size: 0.85rem;" onclick="copyResult()">결과 글자 복사</button>
         </label>
         <div id="result" class="result-box"></div>
     </div>
@@ -154,6 +176,7 @@
     function generateLinks() {
         const linksRaw = document.getElementById('linksInput').value;
         const textRaw = document.getElementById('textInput').value;
+        const htmlSource = document.getElementById('htmlSource');
         const resultContainer = document.getElementById('result');
 
         const links = linksRaw.split('\n')
@@ -163,6 +186,7 @@
         const characters = textRaw.split('');
 
         if (characters.length === 0) {
+            htmlSource.value = '';
             resultContainer.innerHTML = '<span style="color:red; font-size:0.9rem;">텍스트를 입력해주세요.</span>';
             return;
         }
@@ -181,9 +205,30 @@
             }
         });
 
+        // HTML 소스 창 및 결과 미리보기 동시 업데이트
+        htmlSource.value = outputHTML;
         resultContainer.innerHTML = outputHTML;
     }
 
+    // 소스 입력창에서 직적 수정할 때 실시간으로 결과 미리보기 업데이트
+    function renderFromSource() {
+        const source = document.getElementById('htmlSource').value;
+        document.getElementById('result').innerHTML = source;
+    }
+
+    // HTML 태그 소스 자체를 복사
+    function copyHtmlSource() {
+        const htmlSource = document.getElementById('htmlSource');
+        if (!htmlSource.value.trim()) {
+            alert('복사할 HTML 소스가 없습니다.');
+            return;
+        }
+        htmlSource.select();
+        document.execCommand('copy');
+        alert('HTML 소스가 복사되었습니다.');
+    }
+
+    // 화면에 렌더링된 결과 글자(링크 포함) 복사
     function copyResult() {
         const resultContainer = document.getElementById('result');
         
@@ -199,7 +244,7 @@
 
         try {
             document.execCommand('copy');
-            alert('결과가 복사되었습니다. (Ctrl+V로 붙여넣기 하세요)');
+            alert('결과 글자가 복사되었습니다. (에디터 등에 붙여넣기 하세요)');
         } catch (err) {
             alert('복사에 실패했습니다.');
         }
